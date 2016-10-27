@@ -1,0 +1,64 @@
+{
+  "name": "vue-titlecase",
+  "description": "A Vue.js plugin providing the function and the filter to titlecase strings.",
+  "version": "0.2.1",
+  "author": {
+    "name": "Haixing Hu",
+    "email": "starfish.hu@gmail.com"
+  },
+  "homepage": "https://github.com/Haixing-Hu/vue-titlecase",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Haixing-Hu/vue-titlecase.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Haixing-Hu/vue-titlecase/issues"
+  },
+  "main": "dist/vue-titlecase.min.js",
+  "configs": {
+    "directories": {
+      "dist": "dist",
+      "src": "src",
+      "test": "test",
+      "coverage": "coverage"
+    }
+  },
+  "scripts": {
+    "build": "bower install && gulp build",
+    "test": "bower install && gulp test:coveralls",
+    "coverage": "bower install && gulp test:coverage",
+    "coveralls": "bower install && gulp test:coveralls",
+    "ci": "bower install && gulp test:coveralls && gulp build"
+  },
+  "engines": {
+    "node": ">=0.10.0"
+  },
+  "devDependencies": {
+    "bower": "^1.7.9",
+    "bower-update-all": "^0.1.2",
+    "del": "^2.2.0",
+    "run-sequence": "^1.2.1",
+    "bower-webpack-plugin": "^0.1.9",
+    "gulp": "^3.9.1",
+    "gulp-util": "^3.0.7",
+    "webpack": "^1.13.1",
+    "mocha": "^2.5.3",
+    "karma": "^0.13.22",
+    "karma-chrome-launcher": "^1.0.1",
+    "karma-safari-launcher": "^1.0.0",
+    "karma-firefox-launcher": "^1.0.0",
+    "karma-phantomjs-launcher": "^1.0.0",
+    "karma-sauce-launcher": "^1.0.0",
+    "karma-mocha": "^1.0.1",
+    "karma-mocha-reporter": "^2.0.4",
+    "karma-coverage": "^1.0.0",
+    "karma-coveralls": "^1.1.2",
+    "karma-sourcemap-loader": "^0.3.7",
+    "karma-webpack": "^1.7.0",
+    "phantomjs-prebuilt": "^2.1.7",
+    "istanbul": "^0.4.3",
+    "istanbul-instrumenter-loader": "^0.2.0",
+    "vue": "^1.0.24"
+  }
+}
