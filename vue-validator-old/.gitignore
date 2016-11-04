@@ -9,5 +9,3 @@ node_modules
 *.log
 *.swp
 *~
-/docs/gitbook
-/docs
