@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="../vue.min.js"></script>
+</head>
+<body>
+
+<div id="main">
+</div>
+
+<script type="x-template" id="notificationListTemplate">
+    <div id="notifications">
+        <p><b>{{greeting}}</b> ({{notifications.length}})</p>
+
+        <notification v-for="n in notifications" :text="n.text" :index="$index"></notification>
+    </div>
+</script>
+
+<script type="x-template" id="notificationTemplate">
+    <p>
+        {{text}}
+    </p>
+</script>
+
+<script type="x-template" id="complainerTemplate">
+    <button @click="complain">Complain</button>
+</script>
+
+<script type="x-template" id="appTemplate">
+    <complainer-button></complainer-button>
+    <notification-list v-ref:notifications></notification-list>
+</script>
+
+
+<script>
+    var Notification = Vue.extend({
+        props: ['text', 'sticky'],
+        template: '#notificationTemplate'
+    });
+
+    var NotificationList = Vue.extend({
+        data: function() {
+            return {
+                greeting: 'Hey listen!',
+                notifications: []
+            };
+        },
+
+        methods: {
+            add: function(text, sticky) {
+                this.notifications.push({ text: text, sticky: sticky });
+            }
+        },
+
+        template: '#notificationListTemplate',
+
+        components: {
+            'notification': Notification
+        }
+    });
+
+    var Complainer = Vue.extend({
+        template: '#complainerTemplate',
+        methods: {
+            complain: function() {
+                console.log('complaining!');
+                this.$dispatch('notify', 'I have a complaint!');
+            }
+        }
+    });
+
+    var App = Vue.extend({
+        template: '#appTemplate',
+
+        components: {
+            'notification-list': NotificationList,
+            'complainer-button': Complainer
+        },
+
+        events: {
+            'notify': function(text) {
+                this.$refs.notifications.add(text);
+            }
+        }
+    });
+
+    var app = new App({ el: document.querySelector('#main') });
+</script>
+
+</body>
+</html>

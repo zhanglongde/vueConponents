@@ -1,27 +1,15 @@
-import States from '../../../src/components/validity/states'
-import Computed from '../../../src/components/validity/computed'
-import Lifecycles from '../../../src/components/validity/lifecycles'
-import Methods from '../../../src/components/validity/methods'
-import Render from '../../../src/components/validity/render'
-import SingleElement from '../../../src/elements/single'
+import SingleElementClass from '../../../src/elements/single'
 
-const { props, data } = States(Vue)
-const computed = Computed(Vue)
-const { created } = Lifecycles(Vue)
-const methods = Methods(Vue)
-const { render } = Render(Vue)
+const SingleElement = SingleElementClass(Vue)
 
 describe('SingleElement class', () => {
   describe('#getValue', () => {
     describe('input[type="text"]', () => {
       it('should be work', () => {
         const vm = new Vue({
-          data: {
-            child: null
-          },
+          data: { child: null },
           render (h) {
-            const child = this.child = h('input', { attrs: { type: 'text' }})
-            return child
+            return (this.child = h('input', { attrs: { type: 'text' }}))
           }
         }).$mount()
         const single = new SingleElement(vm, vm.child)
@@ -34,12 +22,9 @@ describe('SingleElement class', () => {
     describe('input[type="checkbox"]', () => {
       it('should be work', () => {
         const vm = new Vue({
-          data: {
-            child: null
-          },
+          data: { child: null },
           render (h) {
-            const child = this.child = h('input', { attrs: { type: 'checkbox' }})
-            return child
+            return (this.child = h('input', { attrs: { type: 'checkbox' }}))
           }
         }).$mount()
         const single = new SingleElement(vm, vm.child)
@@ -52,16 +37,13 @@ describe('SingleElement class', () => {
     describe('select', () => {
       it('should be work', () => {
         const vm = new Vue({
-          data: {
-            child: null
-          },
+          data: { child: null },
           render (h) {
-            const child = this.child = h('select', [
+            return (this.child = h('select', [
               h('option', { attrs: { value: 'one' }}),
               h('option', { attrs: { value: 'two' }}),
               h('option', { attrs: { value: 'three' }})
-            ])
-            return child
+            ]))
           }
         }).$mount()
         const single = new SingleElement(vm, vm.child)
@@ -74,62 +56,15 @@ describe('SingleElement class', () => {
         assert.deepEqual(single.getValue(), ['two', 'three'])
       })
     })
-
-    describe('component', () => {
-      it('should be work', done => {
-        const vm = new Vue({
-          components: {
-            validity: {
-              props,
-              data,
-              render
-            },
-            comp: {
-              props: {
-                value: {
-                  type: String,
-                  default: 'hello'
-                }
-              },
-              render (h) {
-                return h('input', { attrs: { type: 'text' }})
-              }
-            }
-          },
-          render (h) {
-            return h('div', [
-              h('validity', {
-                ref: 'validity',
-                props: {
-                  field: 'field1',
-                  validators: { required: true },
-                  child: h('comp', { ref: 'my' })
-                }
-              })
-            ])
-          }
-        }).$mount()
-        const { validity, my } = vm.$refs
-        const single = new SingleElement(validity, validity.child)
-        assert.equal(single.getValue(), 'hello')
-        my.value = 'world'
-        waitForUpdate(() => {
-          assert.equal(single.getValue(), 'world')
-        }).then(done)
-      })
-    })
   })
 
   describe('#checkModified', () => {
     describe('input[type="text"]', () => {
       it('should be work', () => {
         const vm = new Vue({
-          data: {
-            child: null
-          },
+          data: { child: null },
           render (h) {
-            const child = this.child = h('input', { attrs: { type: 'text' }})
-            return child
+            return (this.child = h('input', { attrs: { type: 'text' }}))
           }
         }).$mount()
         const single = new SingleElement(vm, vm.child)
@@ -144,12 +79,9 @@ describe('SingleElement class', () => {
     describe('input[type="checkbox"]', () => {
       it('should be work', () => {
         const vm = new Vue({
-          data: {
-            child: null
-          },
+          data: { child: null },
           render (h) {
-            const child = this.child = h('input', { attrs: { type: 'checkbox' }})
-            return child
+            return (this.child = h('input', { attrs: { type: 'checkbox' }}))
           }
         }).$mount()
         const single = new SingleElement(vm, vm.child)
@@ -164,16 +96,13 @@ describe('SingleElement class', () => {
     describe('select', () => {
       it('should be work', () => {
         const vm = new Vue({
-          data: {
-            child: null
-          },
+          data: { child: null },
           render (h) {
-            const child = this.child = h('select', [
+            return (this.child = h('select', [
               h('option', { attrs: { value: 'one' }}),
               h('option', { attrs: { value: 'two' }}),
               h('option', { attrs: { value: 'three' }})
-            ])
-            return child
+            ]))
           }
         }).$mount()
         const single = new SingleElement(vm, vm.child)
@@ -190,73 +119,16 @@ describe('SingleElement class', () => {
         assert(single.checkModified() === false)
       })
     })
-
-    describe('component', () => {
-      it('should be work', done => {
-        const vm = new Vue({
-          components: {
-            validity: {
-              props,
-              data,
-              render
-            },
-            comp: {
-              props: {
-                value: {
-                  type: String,
-                  default: 'hello'
-                }
-              },
-              render (h) {
-                return h('input', { attrs: { type: 'text' }})
-              }
-            }
-          },
-          render (h) {
-            return h('div', [
-              h('validity', {
-                ref: 'validity',
-                props: {
-                  field: 'field1',
-                  validators: { required: true },
-                  child: h('comp', { ref: 'my' })
-                }
-              })
-            ])
-          }
-        }).$mount()
-        const { validity, my } = vm.$refs
-        const single = new SingleElement(validity, validity.child)
-        assert(single.checkModified() === false)
-        my.value = 'world'
-        waitForUpdate(() => {
-          assert(single.checkModified() === true)
-          my.value = 'hello'
-        }).then(() => {
-          assert(single.checkModified() === false)
-        }).then(done)
-      })
-    })
   })
 
   describe('#listenToucheableEvent / #unlistenToucheableEvent', () => {
     it('should be work', done => {
+      const handleFocusout = jasmine.createSpy()
       const vm = new Vue({
-        props,
-        data,
-        computed,
-        created,
-        methods,
-        propsData: {
-          field: 'field1',
-          child: {},
-          validators: {
-            required: true
-          }
-        },
+        data: { child: null },
+        methods: { willUpdateTouched: handleFocusout },
         render (h) {
-          const child = this.child = h('input', { attrs: { type: 'text' }})
-          return child
+          return (this.child = h('input', { attrs: { type: 'text' }}))
         }
       }).$mount()
       const single = new SingleElement(vm, vm.child)
@@ -264,12 +136,11 @@ describe('SingleElement class', () => {
       triggerEvent(vm.$el, 'focusout')
       waitForUpdate(() => {
       }).then(() => {
-        assert(vm.touched === true)
-        vm.reset()
+        assert(handleFocusout.calls.count() === 1)
         single.unlistenToucheableEvent()
         triggerEvent(vm.$el, 'focusout')
       }).then(() => {
-        assert(vm.touched === false)
+        assert(handleFocusout.calls.count() === 1)
       }).then(done)
     })
   })
@@ -279,15 +150,10 @@ describe('SingleElement class', () => {
       it('should be work', done => {
         const handleInputable = jasmine.createSpy()
         const vm = new Vue({
-          data: {
-            child: null
-          },
-          methods: {
-            handleInputable
-          },
+          data: { child: null },
+          methods: { handleInputable },
           render (h) {
-            const child = this.child = h('input', { attrs: { type: 'text' }})
-            return child
+            return (this.child = h('input', { attrs: { type: 'text' }}))
           }
         }).$mount()
         const single = new SingleElement(vm, vm.child)
@@ -308,15 +174,10 @@ describe('SingleElement class', () => {
       it('should be work', done => {
         const handleInputable = jasmine.createSpy()
         const vm = new Vue({
-          data: {
-            child: null
-          },
-          methods: {
-            handleInputable
-          },
+          data: { child: null },
+          methods: { handleInputable },
           render (h) {
-            const child = this.child = h('input', { attrs: { type: 'checkbox' }})
-            return child
+            return (this.child = h('input', { attrs: { type: 'checkbox' }}))
           }
         }).$mount()
         const single = new SingleElement(vm, vm.child)
@@ -337,19 +198,14 @@ describe('SingleElement class', () => {
       it('should be work', done => {
         const handleInputable = jasmine.createSpy()
         const vm = new Vue({
-          data: {
-            child: null
-          },
-          methods: {
-            handleInputable
-          },
+          data: { child: null },
+          methods: { handleInputable },
           render (h) {
-            const child = this.child = h('select', [
+            return (this.child = h('select', [
               h('option', { attrs: { value: 'one' }}),
               h('option', { attrs: { value: 'two' }}),
               h('option', { attrs: { value: 'three' }})
-            ])
-            return child
+            ]))
           }
         }).$mount()
         const single = new SingleElement(vm, vm.child)
@@ -362,58 +218,6 @@ describe('SingleElement class', () => {
           triggerEvent(vm.$el, 'change')
         }).then(() => {
           assert(handleInputable.calls.count() === 1)
-        }).then(done)
-      })
-    })
-
-    describe('component', () => {
-      it('should be work', done => {
-        const watchInputable = jasmine.createSpy()
-        const vm = new Vue({
-          components: {
-            validity: {
-              props,
-              data,
-              render,
-              methods: {
-                watchInputable
-              }
-            },
-            comp: {
-              props: {
-                value: {
-                  type: String,
-                  default: 'hello'
-                }
-              },
-              render (h) {
-                return h('input', { attrs: { type: 'text' }})
-              }
-            }
-          },
-          render (h) {
-            return h('div', [
-              h('validity', {
-                ref: 'validity',
-                props: {
-                  field: 'field1',
-                  validators: { required: true },
-                  child: h('comp', { ref: 'my' })
-                }
-              })
-            ])
-          }
-        }).$mount()
-        const { validity, my } = vm.$refs
-        const single = new SingleElement(validity, validity.child)
-        single.listenInputableEvent()
-        my.value = 'world'
-        waitForUpdate(() => {
-          assert(watchInputable.calls.count() === 1)
-          single.unlistenInputableEvent()
-          my.value = 'hello'
-        }).then(() => {
-          assert(watchInputable.calls.count() === 1)
         }).then(done)
       })
     })

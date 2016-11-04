@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<h3>DnD</h3>
+
+<div id="list">
+    <ul>
+        <li v-repeat="listX" v-draggable="x: {index: $index, dragged: 'dragged'}" v-dropzone="x: sort(listX, $index, $droptag, $dropdata)">{{$value}}</li>
+    </ul>
+    <div>only ↓</div>
+    <ul>
+        <li v-repeat="listY" v-draggable="y: {index: $index, dragged: 'dragged'}" v-dropzone="
+            y: sort(listY, $index, $droptag, $dropdata),
+            x: move(listX, listY, $index, $droptag, $dropdata)
+        ">{{$value}}</li>
+    </ul>
+    <hr />
+    <div class="trash" v-dropzone="x: remove(listX, $droptag, $dropdata)">trash X</div>
+    <div class="trash" v-dropzone="y: remove(listY, $droptag, $dropdata)">trash Y</div>
+</div>
+
+
+</body>
+</html>

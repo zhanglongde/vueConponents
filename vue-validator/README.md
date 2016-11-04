@@ -6,22 +6,24 @@
 
 Validator component for Vue.js
 
->:warning: NOTE: WIP for Vue.js 2.0 :construction:
+>:warning: NOTE: official release for Vue.js 2.0 not yet :construction:
 
 
 ## Compatibility
 - v2 later
     - Vue.js `1.0.20`+
-- v3 (**WIP** :construction:)
-    - Vue.js `2.0 beta`+
-
+- v3 alpha (**WIP** :construction:)
+    - Vue.js `2.0.3` later
 
 ## Documentation
 - v2 later
     - See [here](http://vuejs.github.io/vue-validator/)
 - v3
-    - **Not yet** (Progress: https://github.com/vuejs/vue-validator/issues/257)
+    - **WIP** :construction: [here](https://vuejs.github.io/vue-validator/)
 
+## Projects
+- v2: (maintance: https://github.com/vuejs/vue-validator/projects/1)
+- v3: (for 3.0 release: https://github.com/vuejs/vue-validator/projects/2)
 
 ## Contributing
 - Fork it !
@@ -31,6 +33,7 @@ Validator component for Vue.js
 - Submit a pull request to `2.x` branch of `vuejs/vue-validator` repository !
 
 ### Branch
+- dev (developement branch for v3 later)
 - 2.x (maintance branch for v2 later)
 
 
@@ -57,12 +60,12 @@ Validator component for Vue.js
 
 ## Issues
 
-Please make sure to read the [Issue Reporting Checklist](https://github.com/vuejs/vue/blob/dev/CONTRIBUTING.md#issue-reporting-guidelines) before opening an issue. Issues not conforming to the guidelines may be closed immediately.
+Please make sure to read the [Issue Reporting Checklist](https://github.com/vuejs/vue/blob/dev/.github/CONTRIBUTING.md#issue-reporting-guidelines) before opening an issue. Issues not conforming to the guidelines may be closed immediately.
 
 
 ## Contribution
 
-Please make sure to read the [Contributing Guide](https://github.com/vuejs/vue/blob/dev/CONTRIBUTING.md) before making a pull request.
+Please make sure to read the [Contributing Guide](https://github.com/vuejs/vue/blob/dev/.github/CONTRIBUTING.md) before making a pull request.
 
 
 ## Changelog

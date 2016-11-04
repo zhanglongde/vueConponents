@@ -3,39 +3,48 @@
   <head>
     <meta charset="utf-8">
     <title>validation classes basic example</title>
-    <script src="../../../node_modules/vue/dist/vue.min.js"></script>
-    <script src="../../../dist/vue-validator.min.js"></script>
+    <script src="../../../node_modules/vue/dist/vue.js"></script>
+    <script src="../../../dist/vue-validator.js"></script>
+    <style>
+      input.invalid { border-color: red; }
+      .errors { color: red; }
+    </style>
   </head>
   <body>
     <div id="app">
-      <validator name="validation1" @valid="onValidation" @invalid="onValidation">
-        <div class="username">
-          <label for="username">username:</label>
-          <input id="username" type="text" v-validate:username="{
-            required: { rule: true, message: 'required you name !!' }
-          }">
-          <span>{{usernameClasses}}</span>
-        </div>
-      </validator>
+      <label for="username">username:</label>
+      <validity field="username" :validators="{
+        required: { message: 'required you name !!' }
+      }">
+        <input id="username" 
+               type="text"
+               ref="username" 
+               @focusin="handleValidation" 
+               @input="handleValidation">
+      </validity>
+      <div class="errors">
+        <p v-if="result.required">{{result.required}}</p>
+      </div>
+      <p>classes: {{usernameClasses}}</p>
     </div>
     <script>
       new Vue({
-        el: '#app',
         data: {
+          result: {},
           usernameClasses: ''
         },
-        ready: function () {
-          this._username = document.getElementById('username')
-          this.usernameClasses = this._username.className
-        },
         methods: {
-          onValidation: function () {
-            if (this._username) {
-              this.usernameClasses = this._username.className
-            }
+          handleValidation: function (e) {
+            var self = this
+            var username = this.$refs.username
+            var $validity = e.target.$validity
+            $validity.validate(function () {
+              self.result = $validity.result
+              self.usernameClasses = username.className
+            })
           }
         }
-      })
+      }).$mount('#app')
     </script>
   </body>
 </html>

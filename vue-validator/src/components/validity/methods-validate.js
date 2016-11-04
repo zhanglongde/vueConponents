@@ -8,8 +8,9 @@ function isPromise (p: Object): boolean {
 }
 
 export default function (Vue: GlobalAPI): Object {
+  const { isPlainObject, resolveAsset } = Vue.util
+
   function _resolveValidator (name: string): ?ValidatorAsset {
-    const { resolveAsset } = Vue.util
     const options = (this.child && this.child.context)
       ? this.child.context.$options
       : this.$options
@@ -21,8 +22,6 @@ export default function (Vue: GlobalAPI): Object {
     field: string,
     value: any
   ): $ValidateDescriptor | null {
-    const { isPlainObject } = Vue.util
-
     const asset: ValidatorAsset = this._resolveValidator(validator)
     if (!asset) {
       // TODO: should be warned
@@ -92,7 +91,7 @@ export default function (Vue: GlobalAPI): Object {
     { fn, value, field, rule, msg }: $ValidateDescriptor,
     cb: Function
   ): void {
-    const future: any = fn.call(this, value, rule)
+    const future: any = fn.call(this.child.context, value, rule)
     if (typeof future === 'function') { // function
       future(() => { // resolve
         cb(true)
@@ -142,6 +141,7 @@ export default function (Vue: GlobalAPI): Object {
     return true
   }
 
+  // TODO: should be re-design of API
   function validate (...args: Array<any>): boolean {
     let validators: Array<string>
     let value: any
@@ -153,16 +153,26 @@ export default function (Vue: GlobalAPI): Object {
       value = args[1]
       cb = args[2]
     } else if (args.length === 2) {
+      if (isPlainObject(args[0])) {
+        validators = [args[0].validator]
+        value = args[0].value || this.getValue()
+        cb = args[1]
+      } else {
+        validators = this._keysCached(this._uid.toString(), this.results)
+        value = args[0]
+        cb = args[1]
+      }
+    } else if (args.length === 1) {
       validators = this._keysCached(this._uid.toString(), this.results)
-      value = args[0]
-      cb = args[1]
+      value = this.getValue()
+      cb = args[0]
     } else {
       validators = this._keysCached(this._uid.toString(), this.results)
       value = this.getValue()
       cb = null
     }
 
-    if (args.length === 3) {
+    if (args.length === 3 || (args.length === 2 && isPlainObject(args[0]))) {
       ret = this._validate(validators[0], value, cb)
     } else {
       validators.forEach((validator: string) => {

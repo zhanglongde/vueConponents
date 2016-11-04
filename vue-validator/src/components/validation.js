@@ -1,5 +1,8 @@
+/* @flow */
 
 export default function (Vue: GlobalAPI): Object {
+  const { extend } = Vue.util
+
   return {
     functional: true,
     props: {
@@ -21,12 +24,16 @@ export default function (Vue: GlobalAPI): Object {
       }
       const tag = props.tag || 'form'
       walkChildren(parent._validation, props.name, children)
-      return h(tag, tag === 'form' ? { attrs: { novalidate: true }} : {}, children)
+      const newData = extend({ attrs: {}}, data)
+      if (tag === 'form') {
+        newData.attrs.novalidate = true
+      }
+      return h(tag, newData, children)
     }
   }
 }
 
-function walkChildren (validation: Validation, name: ?string, children: Array<VNode>): void {
+function walkChildren (validation: Validationable, name: ?string, children: Array<VNode>): void {
   children.forEach((child: VNode) => {
     if (child &&
         child.componentOptions &&

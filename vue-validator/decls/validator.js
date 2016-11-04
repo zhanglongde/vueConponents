@@ -1,5 +1,9 @@
 declare type Dictionary<T> = { [key: string]: T }
 
+declare type ValidatorConfig = {
+  classes: Dictionary<string>
+}
+
 declare type ValidatorDefinition = {
   check: Function, // validator function
   message?: string | Function // error message
@@ -50,6 +54,7 @@ declare type ValidityComponent = {
   modified: boolean,
   result: ValidationResult,
   progresses: ValidatorProgresses,
+  multiple: boolean,
 
   checkModified (): boolean,
   willUpdateTouched (options?: any): void,
@@ -69,7 +74,9 @@ declare interface ValidityElement {
   listenToucheableEvent (): void,
   unlistenToucheableEvent (): void,
   listenInputableEvent (): void,
-  unlistenInputableEvent (): void
+  unlistenInputableEvent (): void,
+  fireInputableEvent (): void,
+  modelValueEqual (vnode: VNode): ?boolean
 }
 
 declare type $ValidityGroupResult = Dictionary<ValidationResult>
@@ -92,3 +99,16 @@ declare type ValidityGroupComponent = {
   getValidityKeys (): Array<string>,
   resetResults (ignore: ?string): void,
 } & Component
+
+declare interface Validationable {
+  register (
+    field: string,
+    validity: ValidityComponent | ValidityGroupComponent,
+    options: { named?: string, group?: string }
+  ): void,
+  unregister (
+    field: string,
+    options: { named?: string, group?: string }
+  ): void,
+  destroy (): void
+}

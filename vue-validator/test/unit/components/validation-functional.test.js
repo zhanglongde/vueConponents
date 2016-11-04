@@ -2,7 +2,7 @@ import ValidityControl from '../../../src/components/validity/index'
 import Validity from '../../../src/components/validity.js'
 import Validation from '../../../src/components/validation'
 import Mixin from '../../../src/mixin'
-import { mapValidation } from '../../../src/util'
+import { mapValidation } from '../../../src/helper'
 
 const validityControl = ValidityControl(Vue)
 const validity = Validity(Vue)
@@ -43,7 +43,7 @@ describe('validation functional component', () => {
             ])
           }
         }).$mount(el)
-        assert.equal(vm.$el.outerHTML, '<div><form novalidate="novalidate"><h1>username</h1><input id="username" type="text"></form></div>')
+        assert.equal(vm.$el.outerHTML, '<div><form novalidate="novalidate"><h1>username</h1><input id="username" type="text" class="untouched pristine"></form></div>')
       })
     })
 
@@ -66,7 +66,7 @@ describe('validation functional component', () => {
             ])
           }
         }).$mount(el)
-        assert.equal(vm.$el.outerHTML, '<div><div><h1>username</h1><input id="username" type="text"></div></div>')
+        assert.equal(vm.$el.outerHTML, '<div><div><h1>username</h1><input id="username" type="text" class="untouched pristine"></div></div>')
       })
     })
   })
@@ -78,7 +78,7 @@ describe('validation functional component', () => {
         components,
         render (h) {
           return h('div', [
-            h('validation', { props: { name: 'validation1' } }, [
+            h('validation', { props: { name: 'validation1' }}, [
               h('h1', ['username']),
               createValidity(h, 'username', {
                 props: {
@@ -190,7 +190,7 @@ describe('validation functional component', () => {
         components,
         render (h) {
           return h('div', [
-            h('validation', { props: { name: 'validation1' } }, [
+            h('validation', { props: { name: 'validation1' }}, [
               h('h1', ['username']),
               createValidity(h, 'username', {
                 props: {
@@ -265,7 +265,7 @@ describe('validation functional component', () => {
         components,
         render (h) {
           return h('div', [
-            h('validation', { props: { name: 'validation1' } }, [
+            h('validation', { props: { name: 'validation1' }}, [
               h('h1', ['username']),
               createValidity(h, 'username', {
                 props: {
@@ -275,7 +275,7 @@ describe('validation functional component', () => {
                 ref: 'validity1'
               })
             ]),
-            h('validation', { props: { name: 'validation2' } }, [
+            h('validation', { props: { name: 'validation2' }}, [
               h('h1', ['password']),
               createValidity(h, 'password', {
                 props: {
@@ -380,6 +380,211 @@ describe('validation functional component', () => {
         assert(validation2.field2.dirty === true)
         assert(validation2.field2.modified === true)
         assert(validation2.field2.required === false)
+      }).then(done)
+    })
+  })
+
+  describe('group validation', () => {
+    it('should be work', done => {
+      const vm = new Vue({
+        mixins: [mixin],
+        components,
+        render (h) {
+          return h('div', [
+            h('validation', { props: { name: 'validation1' }}, [
+              h('h1', ['username']),
+              createValidity(h, 'username', {
+                props: {
+                  field: 'field1',
+                  group: 'group1',
+                  validators: { required: true }
+                },
+                ref: 'validity1'
+              }),
+              h('h1', ['password']),
+              createValidity(h, 'password', {
+                props: {
+                  field: 'field2',
+                  group: 'group2',
+                  validators: { required: true }
+                },
+                ref: 'validity2'
+              }),
+              h('h1', ['confirm']),
+              createValidity(h, 'confirm', {
+                props: {
+                  field: 'field3',
+                  group: 'group2',
+                  validators: { required: true }
+                },
+                ref: 'validity3'
+              })
+            ])
+          ])
+        }
+      }).$mount(el)
+      const { validity1, validity2, validity3 } = vm.$refs
+      const field1 = vm.$el.querySelector('#username')
+      const field2 = vm.$el.querySelector('#password')
+      const field3 = vm.$el.querySelector('#confirm')
+      let validation1, group1, group2
+      waitForUpdate(() => {
+        validity1.validate()
+        validity2.validate()
+        validity3.validate()
+      }).thenWaitFor(1).then(() => {
+        validation1 = vm.$validation.validation1
+        group1 = validation1.group1
+        group2 = validation1.group2
+        assert(validation1.valid === false)
+        assert(validation1.invalid === true)
+        assert(validation1.touched === false)
+        assert(validation1.dirty === false)
+        assert(validation1.modified === false)
+        assert(group1.valid === false)
+        assert(group1.invalid === true)
+        assert(group1.touched === false)
+        assert(group1.dirty === false)
+        assert(group1.modified === false)
+        assert(group2.valid === false)
+        assert(group2.invalid === true)
+        assert(group2.touched === false)
+        assert(group2.dirty === false)
+        assert(group2.modified === false)
+        assert.deepEqual(group1.field1, validity1.result)
+        assert.deepEqual(group2.field2, validity2.result)
+        assert.deepEqual(group2.field3, validity3.result)
+        field1.value = 'hello'
+        triggerEvent(field1, 'input')
+        triggerEvent(field1, 'focusout')
+        field2.value = 'world'
+        triggerEvent(field2, 'input')
+        triggerEvent(field2, 'focusout')
+        field3.value = 'world'
+        triggerEvent(field3, 'input')
+        triggerEvent(field3, 'focusout')
+        validity1.validate()
+        validity2.validate()
+        validity3.validate()
+      }).thenWaitFor(1).then(() => {
+        validation1 = vm.$validation.validation1
+        group1 = validation1.group1
+        group2 = validation1.group2
+        assert(validation1.valid === true)
+        assert(validation1.invalid === false)
+        assert(validation1.touched === true)
+        assert(validation1.dirty === true)
+        assert(validation1.modified === true)
+        assert(group1.valid === true)
+        assert(group1.invalid === false)
+        assert(group1.touched === true)
+        assert(group1.dirty === true)
+        assert(group1.modified === true)
+        assert(group2.valid === true)
+        assert(group2.invalid === false)
+        assert(group2.touched === true)
+        assert(group2.dirty === true)
+        assert(group2.modified === true)
+        assert.deepEqual(group1.field1, validity1.result)
+        assert.deepEqual(group2.field2, validity2.result)
+        assert.deepEqual(group2.field3, validity3.result)
+      }).then(done)
+    })
+  })
+
+  describe('validation properties watching', () => {
+    it('should be work', done => {
+      const validationHandler = jasmine.createSpy()
+      const validHandler = jasmine.createSpy()
+      const usernameValidationHandler = jasmine.createSpy()
+      const validationGroupHandler = jasmine.createSpy()
+      const fieldValidHandler = jasmine.createSpy()
+      const vm = new Vue({
+        watch: { // automatically watching
+          '$validation.validation1.group1.field2.valid': fieldValidHandler,
+          '$validation.validation1.group1': validationGroupHandler
+        },
+        mixins: [mixin],
+        components,
+        render (h) {
+          return h('div', [
+            h('validation', { props: { name: 'validation1' }}, [
+              h('h1', ['username']),
+              createValidity(h, 'username', {
+                props: {
+                  field: 'field1',
+                  validators: { required: true }
+                },
+                ref: 'validity1'
+              }),
+              h('h1', ['password']),
+              createValidity(h, 'password', {
+                props: {
+                  field: 'field2',
+                  group: 'group1',
+                  validators: { required: true }
+                },
+                ref: 'validity2'
+              }),
+              h('h1', ['confirm']),
+              createValidity(h, 'confirm', {
+                props: {
+                  field: 'field3',
+                  group: 'group1',
+                  validators: { required: true }
+                },
+                ref: 'validity3'
+              })
+            ])
+          ])
+        }
+      }).$mount(el)
+      const { validity1, validity2, validity3 } = vm.$refs
+      const field1 = vm.$el.querySelector('#username')
+      const field2 = vm.$el.querySelector('#password')
+      const field3 = vm.$el.querySelector('#confirm')
+      const handlers = [
+        validationHandler,
+        validHandler,
+        usernameValidationHandler
+      ]
+      const unwatches = []
+      // manually watching
+      unwatches.push(vm.$watch('$validation', validationHandler))
+      unwatches.push(vm.$watch('$validation.validation1.valid', validHandler))
+      unwatches.push(vm.$watch('$validation.validation1.field1', usernameValidationHandler))
+      waitForUpdate(() => {
+        validity1.validate()
+        validity2.validate()
+        validity3.validate()
+      }).thenWaitFor(1).then(() => {
+        assert(validationHandler.calls.count() > 0)
+        assert(validHandler.calls.count() > 0)
+        assert(usernameValidationHandler.calls.count() > 0)
+        assert(validationGroupHandler.calls.count() > 0)
+        assert(fieldValidHandler.calls.count() > 0)
+        // reset
+        handlers.forEach(handler => handler.calls.reset())
+        field1.value = 'hello'
+        triggerEvent(field1, 'input')
+        triggerEvent(field1, 'focusout')
+        field2.value = 'world'
+        triggerEvent(field2, 'input')
+        triggerEvent(field2, 'focusout')
+        field3.value = 'world'
+        triggerEvent(field3, 'input')
+        triggerEvent(field3, 'focusout')
+        validity1.validate()
+        validity2.validate()
+        validity3.validate()
+      }).thenWaitFor(1).then(() => {
+        assert(validationHandler.calls.count() > 0)
+        assert(validHandler.calls.count() > 0)
+        assert(usernameValidationHandler.calls.count() > 0)
+        assert(validationGroupHandler.calls.count() > 0)
+        assert(fieldValidHandler.calls.count() > 0)
+        // unwatch
+        unwatches.forEach(unwatch => unwatch())
       }).then(done)
     })
   })

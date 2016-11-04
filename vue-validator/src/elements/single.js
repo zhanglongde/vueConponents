@@ -1,39 +1,27 @@
 /* @flow */
-import { looseEqual } from '../util'
+import { triggerEvent } from '../util'
+import Helper from './helper'
 
-export default class SingleElement {
-  _vm: ValidityComponent
-  _vnode: any
-  _unwatchInputable: Function | void
-  initValue: any
+export default function (Vue: GlobalAPI): any {
+  const { looseEqual } = Vue.util
+  const { addEventInfo, modelValueEqual } = Helper(Vue)
 
-  constructor (vm: ValidityComponent, vnode: any) {
-    this._vm = vm
-    this._vnode = vnode
-    this.initValue = this.getValue()
-    this.attachValidity()
-  }
+  class SingleElement {
+    _vm: ValidityComponent
+    _unwatchInputable: Function | void
+    initValue: any
 
-  get _isBuiltIn (): boolean {
-    const vnode = this._vnode
-    return !vnode.child &&
-      !vnode.componentOptions &&
-      vnode.tag
-  }
+    constructor (vm: ValidityComponent) {
+      this._vm = vm
+      this.initValue = this.getValue()
+      this.attachValidity()
+    }
 
-  get _isComponent (): boolean {
-    const vnode = this._vnode
-    return vnode.child &&
-      vnode.componentOptions &&
-      vnode.tag.match(/vue-component/)
-  }
+    attachValidity (): void {
+      this._vm.$el.$validity = this._vm
+    }
 
-  attachValidity (): void {
-    this._vm.$el.$validity = this._vm
-  }
-
-  getValue (): any {
-    if (this._isBuiltIn) {
+    getValue (): any {
       const el = this._vm.$el
       if (el.tagName === 'SELECT') {
         return getSelectValue(el)
@@ -44,16 +32,9 @@ export default class SingleElement {
           return el.value
         }
       }
-    } else if (this._isComponent) {
-      return this._vnode.child.value
-    } else {
-      // TODO: should be warn !!
-      return ''
     }
-  }
 
-  checkModified (): boolean {
-    if (this._isBuiltIn) {
+    checkModified (): boolean {
       const el = this._vm.$el
       if (el.tagName === 'SELECT') {
         return !looseEqual(this.initValue, getSelectValue(el))
@@ -64,63 +45,63 @@ export default class SingleElement {
           return !looseEqual(this.initValue, el.value)
         }
       }
-    } else if (this._isComponent) {
-      return !looseEqual(this.initValue, this._vnode.child.value)
-    } else {
-      // TODO: should be warn !!
-      return false
     }
-  }
 
-  listenToucheableEvent (): void {
-    this._vm.$el.addEventListener('focusout', this._vm.willUpdateTouched)
-  }
+    listenToucheableEvent (): void {
+      this._vm.$el.addEventListener('focusout', this._vm.willUpdateTouched)
+    }
 
-  unlistenToucheableEvent (): void {
-    this._vm.$el.removeEventListener('focusout', this._vm.willUpdateTouched)
-  }
+    unlistenToucheableEvent (): void {
+      this._vm.$el.removeEventListener('focusout', this._vm.willUpdateTouched)
+    }
 
-  listenInputableEvent (): void {
-    if (this._isBuiltIn) {
-      const el = this._vm.$el
+    listenInputableEvent (): void {
+      const vm = this._vm
+      const el = vm.$el
       if (el.tagName === 'SELECT') {
-        el.addEventListener('change', this._vm.handleInputable)
+        el.addEventListener('change', vm.handleInputable)
       } else {
         if (el.type === 'checkbox') {
-          el.addEventListener('change', this._vm.handleInputable)
+          el.addEventListener('change', vm.handleInputable)
         } else {
-          el.addEventListener('input', this._vm.handleInputable)
+          el.addEventListener('input', vm.handleInputable)
         }
       }
-    } else if (this._isComponent) {
-      this._unwatchInputable = this._vnode.child.$watch('value', this._vm.watchInputable)
-    } else {
-      // TODO: should be warn !!
+    }
+
+    unlistenInputableEvent (): void {
+      const vm = this._vm
+      const el = vm.$el
+      if (el.tagName === 'SELECT') {
+        el.removeEventListener('change', vm.handleInputable)
+      } else {
+        if (el.type === 'checkbox') {
+          el.removeEventListener('change', vm.handleInputable)
+        } else {
+          el.removeEventListener('input', vm.handleInputable)
+        }
+      }
+    }
+
+    fireInputableEvent (): void {
+      const el = this._vm.$el
+      if (el.tagName === 'SELECT') {
+        triggerEvent(el, 'change', addEventInfo)
+      } else {
+        if (el.type === 'checkbox') {
+          triggerEvent(el, 'change', addEventInfo)
+        } else {
+          triggerEvent(el, 'input', addEventInfo)
+        }
+      }
+    }
+
+    modelValueEqual (vnode: VNode): ?boolean {
+      return modelValueEqual(vnode)
     }
   }
 
-  unlistenInputableEvent (): void {
-    if (this._isBuiltIn) {
-      const el = this._vm.$el
-      if (el.tagName === 'SELECT') {
-        el.removeEventListener('change', this._vm.handleInputable)
-      } else {
-        if (el.type === 'checkbox') {
-          el.removeEventListener('change', this._vm.handleInputable)
-        } else {
-          el.removeEventListener('input', this._vm.handleInputable)
-        }
-      }
-    } else if (this._isComponent) {
-      if (this._unwatchInputable) {
-        this._unwatchInputable()
-        this._unwatchInputable = undefined
-        delete this['_unwatchInputable']
-      }
-    } else {
-      // TODO: should be warn !!
-    }
-  }
+  return SingleElement
 }
 
 function getSelectValue (el): Array<any> {

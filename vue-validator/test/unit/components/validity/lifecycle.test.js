@@ -1,3 +1,4 @@
+import { DEFAULT_CLASSES } from '../../../../src/components/validity/props'
 import States from '../../../../src/components/validity/states'
 import Lifecycles from '../../../../src/components/validity/lifecycles'
 import Methods from '../../../../src/components/validity/methods'
@@ -17,12 +18,12 @@ describe('validity component: lifecycle', () => {
           mounted,
           methods,
           render (h) {
-            const child = this.child = h('input', { attrs: { type: 'text' }})
-            return child
+            return (this.child = h('input', { attrs: { type: 'text' }}))
           },
           propsData: {
             field: 'field1',
             child: {}, // dummy
+            classes: DEFAULT_CLASSES,
             validators: {
               required: true
             }
@@ -56,33 +57,34 @@ describe('validity component: lifecycle', () => {
           mounted,
           methods,
           render (h) {
-            const child = this.child = h('fieldset', [
-              h('input', { attrs: { type: 'checkbox', value: 'one' }}),
-              h('input', { attrs: { type: 'checkbox', value: 'two' }}),
-              h('input', { attrs: { type: 'checkbox', value: 'three' }})
-            ])
-            return child
+            return (this.child = h('fieldset', [
+              h('input', { ref: 'input1', attrs: { type: 'checkbox', value: 'one' }}),
+              h('input', { ref: 'input2', attrs: { type: 'checkbox', value: 'two' }}),
+              h('input', { ref: 'input3', attrs: { type: 'checkbox', value: 'three' }})
+            ]))
           },
           propsData: {
             field: 'field1',
+            multiple: true,
             child: {}, // dummy
+            classes: DEFAULT_CLASSES,
             validators: {
               required: true
             }
           }
         }).$mount()
+        const { input1, input2 } = vm.$refs
         assert.equal(vm._elementable.constructor.name, 'MultiElement')
-        const items = vm.$el.querySelectorAll('input[type="checkbox"]')
-        triggerEvent(items[1], 'focusout')
+        triggerEvent(input1, 'focusout')
         waitForUpdate(() => {
           assert(vm.touched === true)
-          items[2].checked = true
-          triggerEvent(items[2], 'change')
+          input2.checked = true
+          triggerEvent(input2, 'change')
         }).then(() => {
           assert(vm.dirty === true)
           assert(vm.modified === true)
-          items[2].checked = false
-          triggerEvent(items[2], 'change')
+          input2.checked = false
+          triggerEvent(input2, 'change')
         }).then(() => {
           assert(vm.modified === false)
           vm.$destroy()
